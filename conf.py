@@ -4,7 +4,8 @@ import uuid
 import json
 import os.path
 
-# Based configuration file class from omplex and plex_mpv_shim.
+# Based configuration file class from omplex and plex_mpv_shim. 
+# Licensed under MIT License from Weston Nielson.
 
 log = logging.getLogger('conf')
 
