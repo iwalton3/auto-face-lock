@@ -9,7 +9,7 @@ By default, the configuration will lock and blank your computer when you leave a
 You need to install the `face_recognition` library.
 
 ```bash
-sudo apt install python3-numpy x11-xserver-utils build-essential cmake
+sudo apt install python3-numpy python3-opencv x11-xserver-utils build-essential cmake
 git clone https://github.com/davisking/dlib.git
 cd dlib
 mkdir build; cd build; cmake ..; cmake --build .
