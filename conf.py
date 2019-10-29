@@ -22,10 +22,11 @@ class Settings(object):
         "blank_interval":       10,
         "lock_if_not_present":  True,
         "blank_if_not_present": True,
+        "lock_if_np_unkn":      True,
         "blank_if_unknown":     False,
         "lock_if_unknown":      False,
         "tolerance":            0.54,
-        "lock_tolerance":       1,        
+        "lock_tolerance":       1, 
     }
 
     def __getattr__(self, name):

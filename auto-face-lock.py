@@ -87,7 +87,11 @@ while True:
     if is_other_present and settings.lock_if_unknown:
         should_lock = True
         should_unblank = False
-    
+
+    if is_other_present and not is_present and settings.lock_if_np_unkn:
+        should_lock = True
+        should_unblank = False
+
     if not is_present and settings.lock_if_not_present:
         should_lock = True
 

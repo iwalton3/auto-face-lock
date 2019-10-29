@@ -39,6 +39,7 @@ This program is written to use xscreensaver. If you use some other screen locker
  - **interval**: Check the webcam every x seconds. *Default: 5*
  - **lock_cmd**: The command to lock your computer. *Default: `xscreensaver-command -lock`*
  - **lock_if_not_present**: Lock your computer if you walk away. *Default: true*
+ - **lock_if_np_unkn**: Lock your computer if someone else is nearby but you aren't. *Default: true*
  - **lock_if_unknown**: Lock your computer if someone else is nearby. *Default: false*
  - **lock_tolerance**: The number of times checks can fail before locking. *Default: 1*
  - **release_after_img**: Causes the webcam to only be on while taking pictures. *Default: true*
