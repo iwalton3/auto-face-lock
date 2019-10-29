@@ -44,3 +44,8 @@ This program is written to use xscreensaver. If you use some other screen locker
  - **release_after_img**: Causes the webcam to only be on while taking pictures. *Default: true*
  - **tolerance**: The tolerance value for facial checking. Try 0.6 if you have problems. *Default: 0.54*
  - **unblank_cmd**: The command to unblank your screen. *Default: `xset dpms force on`*
+
+## Security Note
+
+Please note that this application **is not** a secure form of authentication. It can be used to lock your computer, but using it to unlock your computer is dangerous as it could be fooled by a picture of the authorized user.
+
