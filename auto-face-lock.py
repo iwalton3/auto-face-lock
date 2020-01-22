@@ -78,8 +78,8 @@ else:
             entry = entry.replace('\n',"")
             entry = re.sub(' +', ',', entry)
             face_data.append(numpy.fromstring(entry[1:], dtype=float, sep=','))
+    del face_data[-1]
 
-del face_data[-1]
 while True:
     time.sleep(settings.interval)
     try:
