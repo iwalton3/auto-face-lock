@@ -9,6 +9,7 @@ import logging
 import time
 import numpy
 import sys
+import re
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format="%(asctime)s [%(levelname)8s] %(message)s")
 log = logging.getLogger('')
@@ -40,18 +41,45 @@ def get_img():
         raise RuntimeError("Cannot capture image.")
     return img
 
-face_data = None
+def approved_others(faces_in_photo, list_of_approved_faces):
+    all_users_approved = False
+    for img in list_of_approved_faces:
+        face_comp = face_recognition.compare_faces(img, faces_in_photo, tolerance=settings.tolerance)
+        if face_comp[0] == True:
+            if len(faces_in_photo) > 1:
+                all_users_approved = approved_others(faces_in_photo[1:], list_of_approved_faces)
+            else:
+                all_users_approved = True
+            break
+    return all_users_approved
+
+face_data = []
 if not os.path.isfile(face_data_path):
     print("You do not have an authorized face in the system.")
-    input("Please press enter to capture your face information.")
-    img = get_img()
-    face_data = face_recognition.face_encodings(img)[0]
-    with open(face_data_path, 'w') as json_file:
-        json.dump(list(face_data), json_file)
+    train = True
+    while train:
+        input("Please press enter to capture your face information.")
+        img = get_img()
+        data = face_recognition.face_encodings(img)
+        if not data:
+            log.error("Could not detect a face. Exiting...")
+            sys.exit(1)
+        face_data.append(data[0])
+        with open(face_data_path, 'w') as json_file:
+            for entry in face_data:
+                json_file.write(numpy.array2string(entry) + "\n")
+        res = input("Would you like to train the model more? (y/n): ")
+        if not res or not res.lower()[0] == 'y':
+            train = False
 else:
     with open(face_data_path, 'r') as json_file:
-        face_data = numpy.array(json.load(json_file))
+        strings = json_file.read().split(']\n')
+        for entry in strings:
+            entry = entry.replace('\n',"")
+            entry = re.sub(' +', ',', entry)
+            face_data.append(numpy.fromstring(entry[1:], dtype=float, sep=','))
 
+del face_data[-1]
 while True:
     time.sleep(settings.interval)
     try:
@@ -60,35 +88,40 @@ while True:
         log.error("Cannot capture image for verification.")
         continue
     
-    faces = face_recognition.face_encodings(img)
-    face_comp = face_recognition.compare_faces(faces, face_data, tolerance=settings.tolerance)
-
     is_present = False
-    is_other_present = False
-    for face_match in face_comp:
-        if face_match:
-            is_present = True
-        else:
-            is_other_present = True
+    is_unauth_present = False
     
-    log.debug(f"is_present: {is_present}, is_other_present: {is_other_present}")
+    faces_in_photo = face_recognition.face_encodings(img)
+    if faces_in_photo:
+        log.debug(f"Detected {len(faces_in_photo)} face(s) in photo.")
+        for stored_face in face_data:
+            face_comp = face_recognition.compare_faces(stored_face, faces_in_photo, tolerance=settings.tolerance)
+            if True in face_comp:
+                is_present = True
+                is_unauth_present = not approved_others(faces_in_photo, face_data)
+            else:
+                is_unauth_present = not approved_others(faces_in_photo, face_data)
+            if is_present:
+                break
+    
+    log.debug(f"is_present: {is_present}, is_unauth_present: {is_unauth_present}")
 
     should_blank = False
     should_unblank = False
     should_lock = False
 
-    if is_present:
+    if is_present and not is_unauth_present:
         should_unblank = True
     
-    if is_other_present and settings.blank_if_unknown:
+    if is_unauth_present and settings.blank_if_unknown:
         should_blank = True
         should_unblank = False
     
-    if is_other_present and settings.lock_if_unknown:
+    if is_unauth_present and settings.lock_if_unknown:
         should_lock = True
         should_unblank = False
 
-    if is_other_present and not is_present and settings.lock_if_np_unkn:
+    if is_unauth_present and not is_present and settings.lock_if_np_unkn:
         should_lock = True
         should_unblank = False
 
