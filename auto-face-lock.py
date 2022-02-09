@@ -87,10 +87,10 @@ while True:
     except RuntimeError:
         log.error("Cannot capture image for verification.")
         continue
-    
+
     is_present = False
     is_unauth_present = False
-    
+
     faces_in_photo = face_recognition.face_encodings(img)
     if faces_in_photo:
         log.debug(f"Detected {len(faces_in_photo)} face(s) in photo.")
@@ -103,7 +103,7 @@ while True:
                 is_unauth_present = not approved_others(faces_in_photo, face_data)
             if is_present:
                 break
-    
+
     log.debug(f"is_present: {is_present}, is_unauth_present: {is_unauth_present}")
 
     should_blank = False
@@ -112,11 +112,11 @@ while True:
 
     if is_present and not is_unauth_present:
         should_unblank = True
-    
+
     if is_unauth_present and settings.blank_if_unknown:
         should_blank = True
         should_unblank = False
-    
+
     if is_unauth_present and settings.lock_if_unknown:
         should_lock = True
         should_unblank = False
@@ -127,6 +127,10 @@ while True:
 
     if not is_present and settings.lock_if_not_present:
         should_lock = True
+
+    if not is_present and settings.blank_if_not_present:
+        should_blank = True
+        should_unblank = False
 
     lock_tolerance = settings.lock_tolerance
     if lock_tolerance > 0 and should_lock:
